@@ -2,3 +2,4 @@
 .venv
 .idea
 .env
+/handlers/__pycache__/
