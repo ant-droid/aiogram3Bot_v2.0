@@ -30,11 +30,17 @@ def clean_text(text: str):
     return text.translate(str.maketrans('','',punctuation))
 
 edu = {'эдукон','едукон','educon','эдьюсон'}
+army = {'арми', 'призыв', 'отсрочка'}
 
 @user_private_router.message()
 async def magic_cmd(message: types.Message):
-    if any(keyword in clean_text(message.text.lower().replace(" ","")) for keyword in edu):
-        await message.answer("Это магический фильтр")
+    print(message.text)
+    text = clean_text(message.text.lower().replace(" ",""))
+    print(text)
+    if any(keyword in text for keyword in edu):
+        await message.answer("Ответ по едукону")
+    elif any(keyword in text for keyword in army):
+        await message.answer("Ответ по армии")
 
 
 '''
