@@ -4,12 +4,14 @@ from pymystem3 import Mystem
 from aiogram import types, Router, F
 from aiogram.filters import CommandStart, Command
 
+from kbds import reply
+
 user_private_router = Router()
 
 @user_private_router.message((F.text.lower() == 'start') | (F.text.lower() == 'старт'))
 @user_private_router.message(CommandStart())
 async def start_cmd(message: types.Message):
-    await message.answer('Привет, я виртуальный помощник')
+    await message.answer('Привет, я виртуальный помощник', reply_markup=reply.start_kb)
 
 @user_private_router.message((F.text.lower() == 'menu') | (F.text.lower() == 'меню'))
 @user_private_router.message(Command('menu'))
