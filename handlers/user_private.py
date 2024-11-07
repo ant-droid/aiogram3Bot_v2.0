@@ -34,6 +34,7 @@ def clean_text(text: str):
 
 edu = ['эдукон','едукон','educon','эдьюсон']
 army = ['армия', 'призыв', 'отсрочка']
+test = ['жужелица']
 
 lemmatizer = Mystem()
 
@@ -48,6 +49,10 @@ async def magic_cmd(message: types.Message):
         await message.answer("Ответ по едукону")
     elif any(keyword in text1 for keyword in army) or any(keyword in text2 for keyword in army):
         await message.answer("Ответ по армии")
+    elif any(keyword in text1 for keyword in test) or any(keyword in text2 for keyword in test):
+        await message.answer("*жужжание*")
+    else:
+        await message.answer("Я тебя не понимаю")
 """
 @user_private_router.message()
 async def magic_cmd(message: types.Message):
