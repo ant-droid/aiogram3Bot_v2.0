@@ -32,9 +32,14 @@ async def popopo_cmd(message: types.Message):
 def clean_text(text: str):
     return text.translate(str.maketrans('','',punctuation))
 
-edu = ['эдукон','едукон','educon','эдьюсон']
-army = ['армия', 'призыв', 'отсрочка']
-test = ['жужелица']
+
+keywords_collection = [
+    ['эдукон','едукон','educon','эдьюсон'],
+    ['армия', 'призыв', 'отсрочка'],
+    ['жужелица'],
+]
+
+answers_collection = ["Ответ по едукону","Ответ по армии","*жужжание*"]
 
 lemmatizer = Mystem()
 
@@ -45,14 +50,16 @@ async def magic_cmd(message: types.Message):
     text2 = message.text.lower()
     print("lemm:",text1)
     print("lower:",text2)
-    if any(keyword in text1 for keyword in edu) or any(keyword in text2 for keyword in edu):
-        await message.answer("Ответ по едукону")
-    elif any(keyword in text1 for keyword in army) or any(keyword in text2 for keyword in army):
-        await message.answer("Ответ по армии")
-    elif any(keyword in text1 for keyword in test) or any(keyword in text2 for keyword in test):
-        await message.answer("*жужжание*")
-    else:
+    isAnswered = False
+    for i in range (0, len(keywords_collection)):
+        if any(keyword in text1 for keyword in keywords_collection[i]) or any(keyword in text2 for keyword in keywords_collection[i]):
+            await message.answer(answers_collection[i])
+            isAnswered = True
+    if isAnswered == False:
         await message.answer("Я тебя не понимаю")
+
+
+
 """
 @user_private_router.message()
 async def magic_cmd(message: types.Message):
