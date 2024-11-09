@@ -1,4 +1,4 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 
 start_kb = ReplyKeyboardMarkup(
     keyboard=[
@@ -9,9 +9,11 @@ start_kb = ReplyKeyboardMarkup(
             KeyboardButton(text="Помощь")
         ],
         [
-            KeyboardButton(text="LMAO")
+            KeyboardButton(text="Новый вопрос")
         ],
     ],
     resize_keyboard=True,
     input_field_placeholder="Что вас интересует?"
 )
+
+del_kb = ReplyKeyboardRemove()
