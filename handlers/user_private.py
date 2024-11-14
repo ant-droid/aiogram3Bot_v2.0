@@ -1,22 +1,44 @@
 from string import punctuation
+from aiogram.enums import ParseMode
+from aiogram.enums import ChatType
 from pymystem3 import Mystem
 
 from aiogram import types, Router, F
-from aiogram.filters import CommandStart, Command
+from aiogram.filters import CommandStart, Command, or_f
+from filters.chat_types import ChatTypeFilter
+from aiogram.utils.formatting import (
+    as_list,
+    as_marked_section,
+    Bold,
+)
+
+
 
 from kbds import reply
+from kbds.reply import get_keyboard
 
 user_private_router = Router()
+user_private_router.message.filter(ChatTypeFilter(["private"]))
 
 @user_private_router.message((F.text.lower() == 'start') | (F.text.lower() == 'старт'))
 @user_private_router.message(CommandStart())
 async def start_cmd(message: types.Message):
-    await message.answer('Привет, я виртуальный помощник', reply_markup=reply.start_kb)
+    await message.answer(
+        "Привет, я виртуальный помощник",
+        reply_markup=get_keyboard(
+            "Меню",
+            "О магазине",
+            "Варианты оплаты",
+            "Варианты доставки",
+            placeholder="Что вас интересует?",
+            sizes=(1,1,1,1)
+        ),
+    )
 
 @user_private_router.message((F.text.lower() == 'menu') | (F.text.lower() == 'меню'))
 @user_private_router.message(Command('menu'))
 async def menu_cmd(message: types.Message):
-    await message.answer("Вот меню:", reply_markup=reply.del_kb)
+    await message.answer("Вот меню:")
 
 @user_private_router.message((F.text.lower() == 'help') | (F.text.lower() == 'помощь'))
 @user_private_router.message(Command('help'))
@@ -73,7 +95,7 @@ async def magic_cmd(message: types.Message):
             await message.answer(answers_collection[i])
             isAnswered = True
     if isAnswered == False:
-        await message.answer("Я тебя не понимаю")
+        await message.answer("<b>Я тебя не понимаю</b>")
 
 
 
