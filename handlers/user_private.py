@@ -27,9 +27,9 @@ async def start_cmd(message: types.Message):
         "Привет, я виртуальный помощник",
         reply_markup=get_keyboard(
             "Меню",
-            "О магазине",
-            "Варианты оплаты",
-            "Варианты доставки",
+            "Кнопка1",
+            "Кнопка2",
+            "Кнопка3",
             placeholder="Что вас интересует?",
             sizes=(1,1,1,1)
         ),
@@ -81,7 +81,7 @@ answers_collection = ["Ответ по едукону","Ответ по арми
 
 lemmatizer = Mystem()
 
-@user_private_router.message()
+@user_private_router.message(F.text)
 async def magic_cmd(message: types.Message):
     print("message:",message.text)
     text1 = ''.join(lemmatizer.lemmatize(message.text.lower()))
