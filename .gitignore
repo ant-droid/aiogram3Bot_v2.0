@@ -6,3 +6,6 @@
 /common/__pycache__/
 /kbds/__pycache__/
 /filters/__pycache__/
+/middlewares/__pycache__/
+/database/__pycache__/
+my_base.db
