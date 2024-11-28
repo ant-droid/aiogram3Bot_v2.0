@@ -5,6 +5,7 @@ from aiogram.fsm.state import State, StatesGroup
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models import Question
+from database.orm_query import orm_add_question, orm_add_question_pic, orm_get_questions
 from filters.chat_types import ChatTypeFilter, IsAdmin
 from kbds.reply import get_keyboard
 from aiogram.enums import ParseMode
@@ -14,11 +15,9 @@ admin_router.message.filter(ChatTypeFilter(["private"]),IsAdmin())
 
 ADMIN_KB = get_keyboard(
     "Добавить вопрос",
-    "Изменить вопрос",
-    "Удалить вопрос",
-    "Я так, просто посмотреть зашёл",
+    "Список вопросов",
     placeholder= "Выберите действие",
-    sizes=(2,1,1),
+    sizes=(2,),
 )
 
 @admin_router.message(Command("admin"))
@@ -26,21 +25,25 @@ async def add_product(message: types.Message):
     await message.answer("Что хотите сделать?", reply_markup=ADMIN_KB)
 
 
-@admin_router.message(F.text == "Я так, просто посмотреть зашёл")
-async def starring_at_product(message: types.Message):
+@admin_router.message(F.text == "Список вопросов")
+async def starring_at_product(message: types.Message, session: AsyncSession):
+    for question in await orm_get_questions(session):
+        if question.image:
+            await message.answer_photo(
+                question.image,
+                caption=f"<strong>{question.name}\
+                        </strong>\n{question.description}\nКлючевые слова: {question.keywords}",
+            )
+        else:
+            await message.answer(
+                text=f"<strong>{question.name}\
+                        </strong>\n{question.description}\nКлючевые слова: {question.keywords}",
+            )
     await message.answer("ОК, вот список вопросов")
 
 
 
-@admin_router.message(F.text == "Изменить вопрос")
-async def change_product(message: types.Message):
-    await message.answer("ОК, вот список вопросов")
 
-
-@admin_router.message(F.text == "Удалить вопрос")
-async def delete_product(message: types.Message, counter):
-    print(counter)
-    await message.answer("Выберите вопрос(ы) для удаления")
 
 
 #Код ниже для машины состояний (FSM)
@@ -135,39 +138,39 @@ async def add_keywords(message: types.Message, state: FSMContext):
 
 @admin_router.message(AddQuestion.image, F.text == "пропустить")
 async def add_image(message: types.Message, state: FSMContext, session: AsyncSession):
-    await message.answer("Вопрос добавлен", reply_markup=ADMIN_KB)
     data = await state.get_data()
-    await message.answer(str(data))
-
-    obj = Question(
-        name=data["name"],
-        description=data["description"],
-        keywords=data["keywords"],
-    )
-    session.add(obj)
-    await session.commit()
-
-    await state.clear()
+    try:
+        await orm_add_question(session, data)
+        await message.answer("Вопрос добавлен", reply_markup=ADMIN_KB)
+        await message.answer(str(data))
+        await state.clear()
+    except Exception as e:
+        await message.answer(
+            f"Ошибка добавления запроса \n{str(e)}\n",
+            reply_markup=ADMIN_KB
+        )
+        await state.clear()
 
 
 @admin_router.message(AddQuestion.image, F.photo)
 async def add_image(message: types.Message, state: FSMContext, session: AsyncSession):
     print("Сообщение получено:", message.text)
     await state.update_data(image=message.photo[-1].file_id)
-    await message.answer("Вопрос добавлен", reply_markup=ADMIN_KB)
     data = await state.get_data()
-    await message.answer(str(data))
+    try:
+        await orm_add_question_pic(session, data)
+        await message.answer("Вопрос добавлен", reply_markup=ADMIN_KB)
+        await message.answer(str(data))
+        await state.clear()
 
-    obj = Question(
-        name = data["name"],
-        description = data["description"],
-        keywords = data["keywords"],
-        image = data["image"]
-    )
-    session.add(obj)
-    await session.commit()
-    await state.clear()
-    return
+    except Exception as e:
+        await message.answer(
+            f"Ошибка добавления запроса \n{str(e)}\n",
+            reply_markup=ADMIN_KB
+        )
+        await state.clear()
+
+
 
 @admin_router.message(AddQuestion.image)
 async def add_image(message: types.Message, state: FSMContext):
