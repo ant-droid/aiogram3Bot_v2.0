@@ -44,7 +44,7 @@ async def orm_update_question(session: AsyncSession, question_id: int, data):
     await session.commit()
 
 
-async def orm_delete_product(session: AsyncSession, question_id: int):
+async def orm_delete_question(session: AsyncSession, question_id: int):
     query = delete(Question).where(Question.id == question_id)
     await session.execute(query)
     await session.commit()
