@@ -101,7 +101,10 @@ async def magic_cmd(message: types.Message, session: AsyncSession):
         """
         print(question.keywords," - ",keywords_list, "\n")
         if any(keyword in text1 for keyword in keywords_list) or any(keyword in text2 for keyword in keywords_list):
-            await message.answer(question.description)
+            if question.image is not None:
+                await message.answer_photo(question.image, caption = question.description)
+            else:
+                await message.answer(question.description)
             isAnswered = True
     if isAnswered == False:
         await message.answer("<b>Я тебя не понимаю</b>")
