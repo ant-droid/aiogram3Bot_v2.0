@@ -103,7 +103,7 @@ async def change_question_callback(callback: types.CallbackQuery, state: FSMCont
     AddQuestion.question_for_change = question_for_change
     await callback.answer()
     await callback.message.answer(
-        "Введите название товара", reply_markup=GO_BACK_KB
+        "Введите название вопроса или . для того, чтобы оставить поле без изменения", reply_markup=GO_BACK_KB
     )
     await state.set_state(AddQuestion.name)
 
@@ -165,12 +165,12 @@ async def add_name(message: types.Message, state: FSMContext):
             return
 
         await state.update_data(name=message.text)
-    await message.answer("<b>Введите описание вопроса</b>", reply_markup=GO_BACK_KB)
+    await message.answer("<b>Введите ответ на вопрос</b>", reply_markup=GO_BACK_KB)
     await state.set_state(AddQuestion.description)
 
 @admin_router.message(AddQuestion.name)
 async def add_name(message: types.Message, state: FSMContext):
-    await message.answer("Вы ввели недопустимые данные, введите текст названия товара", reply_markup=GO_BACK_KB)
+    await message.answer("Вы ввели недопустимые данные, введите название вопроса", reply_markup=GO_BACK_KB)
 
 
 
@@ -180,12 +180,12 @@ async def add_description(message: types.Message, state: FSMContext):
         await state.update_data(description=AddQuestion.question_for_change.description)
     else:
         await state.update_data(description=message.text)
-    await message.answer("Введите ключевые слова", reply_markup=GO_BACK_KB)
+    await message.answer("Введите ключевые слова через запятую", reply_markup=GO_BACK_KB)
     await state.set_state(AddQuestion.keywords)
 
 @admin_router.message(AddQuestion.description)
 async def add_description(message: types.Message, state: FSMContext):
-    await message.answer("Вы ввели недопустимые данные, введите текст описания товара", reply_markup=GO_BACK_KB)
+    await message.answer("Вы ввели недопустимые данные, введите ответ на вопрос", reply_markup=GO_BACK_KB)
 
 
 
@@ -194,7 +194,7 @@ async def add_keywords(message: types.Message, state: FSMContext):
     if message.text == '.':
         await state.update_data(keywords=AddQuestion.question_for_change.keywords)
     else:
-        await state.update_data(keywords=message.text)
+        await state.update_data(keywords=message.text.lower())
     if AddQuestion.question_for_change:
         await message.answer("Загрузите изображение либо нажмите 'Удалить фото'", reply_markup=DELETE_PHOTO_KB)
     else:

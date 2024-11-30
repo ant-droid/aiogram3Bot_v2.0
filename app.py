@@ -24,7 +24,7 @@ from common.bot_cmds_list import private
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 bot = Bot(BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
-bot.my_admins_list = [310999305]
+bot.my_admins_list = [310999305, 782502676, 626680790]
 
 dp = Dispatcher()
 

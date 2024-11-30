@@ -5,6 +5,9 @@ from pymystem3 import Mystem
 
 from aiogram import types, Router, F
 from aiogram.filters import CommandStart, Command, or_f
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from database.orm_query import orm_get_questions
 from filters.chat_types import ChatTypeFilter
 from aiogram.utils.formatting import (
     as_list,
@@ -82,7 +85,7 @@ answers_collection = ["Ответ по едукону","Ответ по арми
 lemmatizer = Mystem()
 
 @user_private_router.message(F.text)
-async def magic_cmd(message: types.Message):
+async def magic_cmd(message: types.Message, session: AsyncSession):
     print("message:",message.text)
     text1 = ''.join(lemmatizer.lemmatize(message.text.lower()))
     text2 = message.text.lower()
@@ -90,9 +93,15 @@ async def magic_cmd(message: types.Message):
     print("lower:",text2)
 
     isAnswered = False
-    for i in range (0, len(keywords_collection)):
-        if any(keyword in text1 for keyword in keywords_collection[i]) or any(keyword in text2 for keyword in keywords_collection[i]):
-            await message.answer(answers_collection[i])
+    for question in await orm_get_questions(session):
+        keywords_list = [k.strip() for k in question.keywords.split(",")]
+        """
+        keywords_list_lemm = ''.join(lemmatizer.lemmatize(question.keywords.lower()))
+        keywords_list.extend(keywords_list_lemm.split(","))
+        """
+        print(question.keywords," - ",keywords_list, "\n")
+        if any(keyword in text1 for keyword in keywords_list) or any(keyword in text2 for keyword in keywords_list):
+            await message.answer(question.description)
             isAnswered = True
     if isAnswered == False:
         await message.answer("<b>Я тебя не понимаю</b>")
@@ -130,3 +139,15 @@ async def educon_cmd(message: types.Message):
 async def magic_cmd(message: types.Message):
     await message.answer("Это магический фильтр")
 '''
+
+"""
+isAnswered = False
+    for question in await orm_get_questions(session):
+        print(question.keywords, "\n")
+    for i in range (0, len(keywords_collection)):
+        if any(keyword in text1 for keyword in keywords_collection[i]) or any(keyword in text2 for keyword in keywords_collection[i]):
+            await message.answer(answers_collection[i])
+            isAnswered = True
+    if isAnswered == False:
+        await message.answer("<b>Я тебя не понимаю</b>")
+"""
